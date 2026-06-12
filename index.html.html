@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>47°C Bahar, 25°C Andar — Bundelkhand Natural Cooling Guide</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F6EDD6; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+// ─── DESIGN TOKENS ─────────────────────────────────────
+const T = {
+  sand:     "#F6EDD6",
+  sandDark: "#EAD9B8",
+  heat:     "#C0340D",
+  warm:     "#D9700E",
+  amber:    "#B8860B",
+  cool:     "#1761A8",
+  coolDark: "#0E4478",
+  green:    "#1E7A4A",
+  violet:   "#5B31A8",
+  text:     "#1A1108",
+  muted:    "#6B5433",
+  white:    "#FFFFFF",
+  card:     "#FFFDF5",
+};
+
+const PHASES = [
+  {
+    id: 0, emoji: "⚡", label: "Turant Karo", eng: "This Week",
+    range: "₹0 – ₹5,000", accent: T.heat,
+    methods: [
+      {
+        emoji: "🏠", name: "White Roof Coating", hindi: "Safed Chuna Roof",
+        impact: "−5 to −8°C", cost: "₹500–₹2,000", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Paint roof white with chuna (lime). Roof goes from 70°C to 40°C — the single fastest win.",
+        howTo: "Mix chuna powder with water to thick paste. Apply 2 coats on entire terrace. Or lay aluminium foil sheets/white ceramic tiles. Re-apply every year in March before summer.",
+        items: "Chuna (lime) 5–10 kg ≈ ₹100–200 • White cement paint • Aluminium foil rolls (optional)",
+        tip: "Your flat RCC roof is the #1 heat source. This one step alone can drop ceiling temperature by 8–10°C."
+      },
+      {
+        emoji: "💧", name: "Wet Gunny Bags on Roof", hindi: "Bori Bichhaana",
+        impact: "−3 to −5°C", cost: "₹100–₹400", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Spread wet jute sacks on terrace, keep moist all day. Evaporation cools the concrete slab below.",
+        howTo: "Collect old gunny bags (bori). Soak well. Spread over entire terrace. Re-wet every 2–3 hours. Most effective 10 AM – 4 PM.",
+        items: "Old gunny bags (bori) — free or ₹10–20 each • Pipe or bucket for water",
+        tip: "Bundelkhand's dry air means very high evaporation rate — this works far better here than in Mumbai."
+      },
+      {
+        emoji: "🌿", name: "Khus Tatty Curtains", hindi: "Khas ki Tatty",
+        impact: "−8 to −14°C (local)", cost: "₹300–₹1,500", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Hang wetted vetiver (khus) grass curtains on windows facing the wind. Hot dry air passes through, cools by evaporation — traditional natural AC.",
+        howTo: "Buy khus tatty from local market before summer. Hang outside window. Sprinkle water every hour or connect a thin pipe drip. Air passing through cools the entire room.",
+        items: "Khus tatty panels (local market ₹200–400 each) • Rope/hooks • Water drip pipe optional",
+        tip: "YOUR BEST WEAPON in Bundelkhand. Dry heat + khus = 10–15°C local cooling. Traditional Bundelkhand homes used this for centuries."
+      },
+      {
+        emoji: "🎍", name: "Bamboo Chik Blinds", hindi: "Baans ki Chik",
+        impact: "−3 to −5°C", cost: "₹100–₹400/window", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Install bamboo/reed blinds on all west and south-facing windows. Blocks direct sunlight while allowing airflow. Keep wet for double effect.",
+        howTo: "Buy bamboo chik from local market. Hook outside window frame. Lower during 10 AM–5 PM. Keep wet for evaporative bonus.",
+        items: "Bamboo/reed chik blinds (local market) • Hooks and rope",
+        tip: "Combine with khus tatty — wet bamboo + khus is the classic Bundelkhand summer setup."
+      },
+      {
+        emoji: "🌙", name: "Night Purging (Raat ki Hawa)", hindi: "Raat ki Hawa",
+        impact: "−5 to −8°C (stored)", cost: "₹0", diff: "Easy",
+        diffCol: T.green,
+        blurb: "After 9 PM, fully open ALL windows and doors for 2–3 hours. Night air in Panna drops to 30–34°C — 'charging' walls with coolness that lasts till 11 AM next day.",
+        howTo: "From 9–10 PM onward: open every window, door, ventilator. Run ceiling fan to circulate. Close everything by midnight. Repeat daily — this habit alone drops average room temp by 5–7°C.",
+        items: "Nothing needed — just daily discipline",
+        tip: "Thick walls store 'coolness' well. Do night purging at 9 PM and your room stays under 35°C until late morning."
+      },
+      {
+        emoji: "🪟", name: "Window Direction Strategy", hindi: "Khidki Direction",
+        impact: "−3 to −5°C", cost: "₹0", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Close all east/west windows during day (they face the sun). Keep only north windows slightly open. Reverse at night.",
+        howTo: "8 AM: Close east windows. 11 AM: Close west windows. Keep only north windows open a crack. 9 PM: Open everything for night purge.",
+        items: "Nothing needed",
+        tip: "Most heat enters through east (morning sun) and west (afternoon sun) windows. Closing them costs you nothing."
+      },
+    ]
+  },
+  {
+    id: 1, emoji: "🔧", label: "Ek Mahine Mein", eng: "Month 1",
+    range: "₹3,000 – ₹15,000", accent: T.warm,
+    methods: [
+      {
+        emoji: "🧱", name: "Roof Insulation (Thermocol/XPS)", hindi: "Chhat ka Insulation",
+        impact: "−6 to −10°C", cost: "₹5,000–₹15,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "Lay 50mm EPS (thermocol) sheets on terrace, cover with sand+cement. Stops the slab from becoming a radiator inside your home.",
+        howTo: "Buy EPS/XPS foam sheets 50mm from building material shops. Lay on terrace, butt-joint edges. Cover with 40mm sand+cement screed (or tiles) to protect from UV. Do not leave foam exposed.",
+        items: "EPS thermocol 50mm sheets ≈ ₹35–55/sqft • River sand • Cement • Optional: tiles",
+        tip: "The single most effective structural investment. Roof insulation pays for itself in the first summer — often cuts AC electricity bills by 30%."
+      },
+      {
+        emoji: "🏺", name: "Clay Matka Cooler", hindi: "Matka Cooler",
+        impact: "−5 to −10°C (room)", cost: "₹300–₹1,500", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Line up large unglazed clay matkas (filled with water) near the incoming window. Porous clay sweats — evaporation cools surrounding air. Ancient AC.",
+        howTo: "Get 5–10 large surahis/matkas from local potter. Fill with water. Wet outer surface. Place in front of incoming air. Refill twice daily. One small table fan (25W) improves airflow dramatically.",
+        items: "Large unglazed clay matka/surahi ₹50–150 each — available from local kumhar (potter)",
+        tip: "Pottery is a local craft in your region. Buy directly from the kumhar — cheaper and supports local trade."
+      },
+      {
+        emoji: "🌱", name: "Terrace Garden", hindi: "Chhat ka Bagicha",
+        impact: "−4 to −7°C", cost: "₹1,500–₹6,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "Grow plants in containers on terrace. Plants absorb sunlight instead of the concrete slab. 30% coverage = significant roof cooling.",
+        howTo: "Place large grow bags (50L) or old drums on terrace. Grow lauki (bottle gourd), karela (bitter gourd), torai — fast creepers that spread quickly. Water daily in morning. Use soil+compost mix.",
+        items: "Grow bags ₹50–100 each • Compost+soil • Seeds of lauki/karela (locally available free/cheap)",
+        tip: "Bonus: free vegetables! Lauki and karela grow explosively in Bundelkhand summer heat."
+      },
+      {
+        emoji: "🌿", name: "West Wall Creeper Plants", hindi: "Paschim Deewar pe Bail",
+        impact: "−5 to −10°C (that wall)", cost: "₹500–₹2,500", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Wire mesh on west wall + fast creepers. A vine-covered wall is 15–20°C cooler than bare concrete. Madhumalati can cover a wall in 4–6 weeks.",
+        howTo: "Fix GI wire mesh 3–4 inches off the west wall using wall hooks. Plant Madhumalati (Rangoon creeper), Chameli, or Lauki at base. Water daily. Vines climb the mesh fast.",
+        items: "GI wire mesh jali ₹50/sqft • Wall hooks • Creeper plants ₹30–100 each",
+        tip: "Madhumalati grows very fast in your climate and also gives beautiful fragrant flowers."
+      },
+      {
+        emoji: "🪩", name: "Solar Window Film", hindi: "Solar Window Film",
+        impact: "−2 to −4°C", cost: "₹80–₹200/sqft", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Stick solar reflective film on glass windows/doors. Rejects 60–80% of solar heat through glass. One-time, lasts 5–7 years.",
+        howTo: "Buy silver/bronze solar window film (Flipkart/Amazon). Clean glass. Apply from inside with soapy water and squeegee (included). Trim edges. 30 min per window.",
+        items: "Solar window film (online, ₹80–200/sqft) • Soapy water • Squeegee",
+        tip: "If you have glass doors, this is essential. DIY-friendly — no installation cost needed."
+      },
+      {
+        emoji: "🌀", name: "Ceiling Exhaust Fan", hindi: "Ceiling se Garam Hawa Bahar",
+        impact: "−2 to −3°C", cost: "₹1,500–₹4,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "Hot air collects at ceiling. A ceiling-level exhaust fan pushes it out continuously. Pair with cool air entering low on north side.",
+        howTo: "Install 6–8 inch exhaust fan at top of north or east wall, near ceiling. Run during daytime. Cool air enters from low window on cooler side, hot air exits at top.",
+        items: "Exhaust fan 6–8 inch ₹1,000–2,500 • Electrician for installation",
+        tip: "Stack effect: hot air rises and exits at top, cool air drawn in at bottom. Use with khus tatty on the inlet window."
+      },
+    ]
+  },
+  {
+    id: 2, emoji: "🏗️", label: "Teen Mahine Mein", eng: "3 Months",
+    range: "₹15,000 – ₹60,000", accent: T.green,
+    methods: [
+      {
+        emoji: "🌍", name: "Earth Air Tunnel (Zameen Cooling)", hindi: "Zameen ke Neeche Hawa",
+        impact: "−12 to −18°C", cost: "₹20,000–₹60,000", diff: "Hard",
+        diffCol: T.heat,
+        blurb: "Most powerful natural system. Bury 6-inch PVC pipes 3.5m deep, 25m long. Ground stays 20–22°C year-round. Air enters at 47°C and comes out at 28–32°C.",
+        howTo: "Dig trench 3.5–4m deep, 25–30m long. Lay 6–8 inch PVC pipes. One end: shaded air inlet outside. Other end: opens at floor level inside home. Air flows naturally, or add a small 50W fan at inlet. Backfill trench.",
+        items: "6–8 inch PVC pipes ₹200–400/meter • PVC fittings • Mesh inlet/outlet covers • Excavation labor",
+        tip: "Your land in Panna is YOUR advantage here. Urban people can't do this. Underground temp in Bundelkhand stays 20–22°C forever — runs with zero electricity cost, zero maintenance."
+      },
+      {
+        emoji: "⛲", name: "Courtyard Water Body", hindi: "Angan mein Paani",
+        impact: "−5 to −10°C (courtyard)", cost: "₹3,000–₹25,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "A large tank or small pond in the open courtyard. Evaporating water cools all surrounding air. Traditional havelis used this for 1000 years.",
+        howTo: "Place a 500–1000L tank in shaded courtyard with a small pump creating ripples. Surround with potted plants. Even 3 large 200L drums help. Connect to rainwater harvesting so you save water.",
+        items: "Water storage tanks • Small circulation pump ₹1,500–3,000 • Potted plants",
+        tip: "Water + shade + plants = a natural 3-way cooling system. Your courtyard area can be 8–10°C cooler than the street."
+      },
+      {
+        emoji: "🌳", name: "Strategic Tree Plantation", hindi: "Ped Lagao",
+        impact: "−8 to −12°C (future)", cost: "₹2,000–₹8,000", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Plant Bamboo (shade in 1–2 years) on west side, Neem on south (shade in 3–5 years). A shaded house is 8–12°C cooler — permanent solution.",
+        howTo: "BAMBOO on west side — fastest, spreads into thick screen in 1–2 years. NEEM on south — lifelong shade + air purification. BANANA near windows — huge leaves block direct sun fast. Get saplings free from MP Forest Department/Krishi Vigyan Kendra, Panna.",
+        items: "Bamboo saplings ₹50–200 each • Neem saplings (free at govt nurseries) • Banana suckers (local farmers)",
+        tip: "MP Forest Dept and KVK Panna give free saplings under MNREGA/state schemes. Contact them — this tree-planting can be nearly free."
+      },
+      {
+        emoji: "🪨", name: "Mud Plastering External Walls", hindi: "Mitti ki Lipayi",
+        impact: "−5 to −8°C", cost: "₹5,000–₹20,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "2–3 inch mud plaster (mitti + gobar + bhusa) on west/south walls. Mud absorbs heat slowly all day, releases only at night. Traditional thermal mass.",
+        howTo: "Mix: 3 parts clay soil + 1 part fresh cow dung + 1 part chopped straw. Apply 2 coats on external walls (let dry between coats). Repair cracks yearly before summer.",
+        items: "Clay soil (free, locally available) • Gobar (free from cattle) • Bhusa/straw (free) • Labour",
+        tip: "Your region has excellent clay soil. This costs almost nothing except labour — ancient Bundelkhand building wisdom."
+      },
+      {
+        emoji: "🎋", name: "Bamboo Pergola on West Side", hindi: "Bamboo ki Chhatri",
+        impact: "−6 to −10°C (that wall)", cost: "₹8,000–₹25,000", diff: "Medium",
+        diffCol: T.amber,
+        blurb: "Bamboo frame 3–4 feet from west wall with creepers growing over it. Creates shaded dead-air insulation zone. Also gives you a cool shaded sitting area.",
+        howTo: "Set bamboo poles in ground 3–4 feet from west wall. Lay horizontal beams. String wire mesh across for creeper support. Plant lauki/tori or any creeper at base. Vines cover it in 4–6 weeks.",
+        items: "Bamboo poles ₹50–150 each (locally abundant in MP) • GI wire • Concrete footings",
+        tip: "If you have bamboo growing on your farm in Panna — harvest and use it directly. Zero material cost."
+      },
+      {
+        emoji: "🖌️", name: "Annual Lime Wash (Chuna Safeda)", hindi: "Chuna Safeda",
+        impact: "−3 to −5°C", cost: "₹1,000–₹5,000", diff: "Easy",
+        diffCol: T.green,
+        blurb: "Fresh lime wash on all external walls every March. Reflects 70–80% of solar radiation. Ultra traditional, ultra cheap, ultra effective.",
+        howTo: "Buy chuna in bulk. Mix with water. Apply 2 coats on all external walls. Add a pinch of neel (indigo) for the classic Indian white-blue tint that reflects even more UV.",
+        items: "Chuna (lime) 20–50 kg • Neel (indigo blue powder) • Paint brushes • Ladder",
+        tip: "Your local mistri knows exactly how. Still practiced in villages — this is 1000-year-old solar reflectance technology."
+      },
+    ]
+  },
+  {
+    id: 3, emoji: "🏛️", label: "Permanent / New Build", eng: "Structural",
+    range: "Major Investment", accent: T.violet,
+    methods: [
+      {
+        emoji: "⬇️", name: "Underground Room (Tankhana)", hindi: "Zameen ke Neeche ka Kamra",
+        impact: "−15 to −22°C", cost: "₹1–4 Lakh", diff: "Major Project",
+        diffCol: T.heat,
+        blurb: "The ultimate. 4–6 feet below ground = 18–22°C permanently. Traditional Indian palaces had 'tankhana' rooms used every summer. You have the land.",
+        howTo: "Excavate one room 4–6 feet below grade. RCC construction with waterproofing membrane. Small ventilation shafts. Connect to earth air tunnel for fresh air flow. Semi-buried (3 feet below, 3 above) is easier and almost as effective.",
+        items: "RCC construction • Waterproofing membrane • Ventilation shafts",
+        tip: "Kalinjar Fort and Ajaygarh (both near Panna!) have underground cooling chambers that are still usable today — built in the same Vindhyan sandstone you have locally."
+      },
+      {
+        emoji: "🏛️", name: "Central Courtyard (Angan) Design", hindi: "Angan wala Ghar",
+        impact: "−10 to −15°C", cost: "Design decision", diff: "New Build",
+        diffCol: T.violet,
+        blurb: "Traditional haveli — open central courtyard. Hot air rises and exits like a chimney. Cool air drawn in from shaded sides. The courtyard stays 8–12°C cooler than outside.",
+        howTo: "Orient home around a central open-to-sky courtyard. All main rooms face inward. Plant neem or peepal in center. Add water tank. Deep verandas around all sides for transition shade.",
+        items: "Architectural planning — no material cost beyond the build itself",
+        tip: "Study traditional Bundelkhand havelis in Panna town for inspiration. This design principle has worked in your climate for 500+ years."
+      },
+      {
+        emoji: "🪨", name: "Vindhyan Sandstone Thick Walls", hindi: "Moti Patthar ki Deevaar",
+        impact: "−10 to −15°C", cost: "Included in build cost", diff: "New Build",
+        diffCol: T.violet,
+        blurb: "18–24 inch thick Vindhyan sandstone walls. Absorbs heat all day, releases only at night. Traditional homes in your region used this — they never needed fans until the 1970s.",
+        howTo: "Use local Panna/Vindhyan sandstone for 18-inch minimum wall thickness in all structural walls. More expensive upfront but lasts centuries with zero cooling cost.",
+        items: "Local Vindhyan sandstone — quarried in Panna district itself • Skilled stone masonry",
+        tip: "Panna District literally sits on Vindhyan sandstone. The perfect climate material is right under your feet."
+      },
+      {
+        emoji: "🏡", name: "Terracotta Tiled Roof (Khaprail)", hindi: "Khaprail wali Chhat",
+        impact: "−8 to −12°C", cost: "₹50,000–₹2,00,000", diff: "Renovation",
+        diffCol: T.heat,
+        blurb: "Clay/Mangalore tiles on a pitched roof create a ventilated air gap. This air pocket is a natural insulator — tiled roofs are 15–20°C cooler than flat RCC slabs.",
+        howTo: "Build sloped roof over existing flat slab using bamboo or steel rafters. Use Mangalore clay tiles or local terracotta tiles. Install ridge ventilators at peak for hot air exit.",
+        items: "Mangalore tiles • Rafters (bamboo or steel) • Waterproofing underlay",
+        tip: "Village homes in Panna area with khaprail roofs stay cool naturally. This is the roof that was DESIGNED for your climate."
+      },
+      {
+        emoji: "🧭", name: "Smart Window Orientation", hindi: "Sahi Direction ki Khidkiyaan",
+        impact: "−5 to −10°C", cost: "Design decision", diff: "New Build",
+        diffCol: T.violet,
+        blurb: "Fewer windows on east and west. More on north. Deep chajja (2+ foot overhang) on south to block summer sun while allowing winter sun.",
+        howTo: "Orient main rooms north-facing. Minimize east and west window sizes. Add 2+ foot stone/RCC chajja above south windows. Use jali (perforated stone screen) on south for light without direct heat.",
+        items: "Architectural planning • Stone/RCC chajja • Optional: stone jali screens",
+        tip: "Traditional Bundelkhand homes already had small east/west windows — this was climate intelligence, not coincidence."
+      },
+    ]
+  },
+];
+
+const COOLING_MATH = [
+  { step: "Outside temp", note: "47–50°C peak summer", temp: 48, col: "#B91C1C" },
+  { step: "White roof + insulation", note: "Prevents 60% of roof heat entry", delta: -8, col: "#EA580C" },
+  { step: "Khus tatty + evaporation", note: "Best in dry Bundelkhand air", delta: -9, col: "#D97706" },
+  { step: "Shading + trees + walls", note: "Blocks direct sun on walls", delta: -5, col: "#15803D" },
+  { step: "Earth air tunnel", note: "Ground = 20–22°C all year", delta: -13, col: "#0369A1" },
+  { step: "Indoor target", note: "✅ Achieved with full plan", temp: 25, col: "#1D4ED8" },
+];
+
+const QUICK = [
+  { i: "🌡️", t: "Realistic", b: "Full combo can hit 24–28°C indoors even at 47°C outside." },
+  { i: "🏜️", t: "Dry = Good", b: "MP dry heat is ideal for evaporative cooling — khus tatty works far better than in Mumbai." },
+  { i: "🌙", t: "Night is Key", b: "Panna nights drop to 30–34°C. Night purging is free and powerful." },
+  { i: "🎯", t: "One Room First", b: "Focus all methods on your bedroom — small space is far easier to cool." },
+  { i: "💧", t: "Body Cooling", b: "Wear cotton. Wet cloth on neck. Khus sherbet. Makes 33°C feel like 27°C." },
+  { i: "⚡", t: "Small Fan OK", b: "A 25–75W table fan + natural cooling methods = AC-like comfort. Not 'major electricity'." },
+];
+
+function DiffBadge({ diff, col }) {
+  return (
+    <span style={{
+      background: col + "18", color: col, border: `1px solid ${col}40`,
+      fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20, whiteSpace: "nowrap"
+    }}>{diff}</span>
+  );
+}
+
+function MethodCard({ m, idx, expanded, onToggle, accent }) {
+  const open = expanded === idx;
+  return (
+    <div style={{
+      background: T.card, borderRadius: 14, marginBottom: 10,
+      border: `1px solid ${T.sandDark}`, overflow: "hidden",
+      boxShadow: open ? `0 2px 12px ${accent}22` : "0 1px 3px rgba(0,0,0,0.07)"
+    }}>
+      <button onClick={() => onToggle(idx)} style={{
+        width: "100%", background: "none", border: "none", cursor: "pointer",
+        padding: "12px 14px", textAlign: "left", display: "flex", gap: 10, alignItems: "flex-start"
+      }}>
+        <span style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }}>{m.emoji}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: T.text, lineHeight: 1.2 }}>{m.name}</div>
+          <div style={{ fontSize: 11, color: T.muted, marginBottom: 6 }}>{m.hindi}</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            <span style={{
+              background: T.coolDark, color: "#fff",
+              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20
+            }}>❄️ {m.impact}</span>
+            <span style={{
+              background: T.amber + "22", color: T.amber, border: `1px solid ${T.amber}40`,
+              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20
+            }}>₹ {m.cost}</span>
+            <DiffBadge diff={m.diff} col={m.diffCol} />
+          </div>
+        </div>
+        <span style={{ color: T.muted, fontSize: 14, flexShrink: 0, paddingTop: 4 }}>{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div style={{ borderTop: `1px solid ${T.sandDark}`, padding: "12px 14px", background: "#FEFBF3" }}>
+          <p style={{ fontSize: 13, color: T.text, lineHeight: 1.6, marginBottom: 10 }}>{m.blurb}</p>
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: accent, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>How to do it</div>
+            <p style={{ fontSize: 12.5, color: T.text, lineHeight: 1.65 }}>{m.howTo}</p>
+          </div>
+          <div style={{
+            background: T.amber + "18", border: `1px solid ${T.amber}30`,
+            borderRadius: 8, padding: "8px 10px", marginBottom: 10
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: T.amber, marginBottom: 3 }}>🛒 MATERIALS NEEDED</div>
+            <div style={{ fontSize: 12, color: "#5A3D05", lineHeight: 1.5 }}>{m.items}</div>
+          </div>
+          <div style={{
+            background: T.green + "12", border: `1px solid ${T.green}30`,
+            borderRadius: 8, padding: "8px 10px"
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: T.green, marginBottom: 3 }}>📍 BUNDELKHAND TIP</div>
+            <div style={{ fontSize: 12, color: "#1A3A1A", lineHeight: 1.5 }}>{m.tip}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [tab, setTab] = useState(0);
+  const [expanded, setExpanded] = useState(null);
+  const [showMath, setShowMath] = useState(false);
+
+  const phase = PHASES[tab];
+
+  const toggle = (idx) => setExpanded(expanded === idx ? null : idx);
+
+  // Running temperature calc
+  let running = 48;
+  const mathRows = COOLING_MATH.map(r => {
+    if (r.temp !== undefined) return { ...r, after: r.temp };
+    const after = running + r.delta;
+    running = after;
+    return { ...r, after };
+  });
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: T.sand, minHeight: "100vh", maxWidth: 480, margin: "0 auto" }}>
+
+      {/* ── HEADER ─────────────────────────────────── */}
+      <div style={{
+        background: `linear-gradient(135deg, ${T.heat} 0%, #8B1A00 50%, ${T.coolDark} 100%)`,
+        padding: "20px 16px 16px", color: "#fff"
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, opacity: 0.7, marginBottom: 4 }}>
+          NATURAL COOLING PLAN · BUNDELKHAND EDITION
+        </div>
+        <h1 style={{ fontSize: 22, fontWeight: 900, margin: "0 0 12px", lineHeight: 1.2 }}>
+          47°C Bahar →<br/>25°C Andar
+        </h1>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{
+            background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "8px 14px",
+            textAlign: "center", flex: 1
+          }}>
+            <div style={{ fontSize: 26, fontWeight: 900, color: "#FF8A65", letterSpacing: -1 }}>47–50°C</div>
+            <div style={{ fontSize: 10, opacity: 0.75 }}>Outside Peak</div>
+          </div>
+          <div style={{ fontSize: 22, opacity: 0.6 }}>→</div>
+          <div style={{
+            background: "rgba(255,255,255,0.12)", borderRadius: 10, padding: "8px 14px",
+            textAlign: "center", flex: 1
+          }}>
+            <div style={{ fontSize: 26, fontWeight: 900, color: "#81D4FA", letterSpacing: -1 }}>24–28°C</div>
+            <div style={{ fontSize: 10, opacity: 0.75 }}>Indoors Target</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, fontSize: 11.5, opacity: 0.8, lineHeight: 1.5 }}>
+          Zero major electricity · 100% natural methods · Tailored for MP/Bundelkhand dry heat
+        </div>
+      </div>
+
+      {/* ── QUICK FACTS ────────────────────────────── */}
+      <div style={{ background: T.coolDark, padding: "12px 14px" }}>
+        <div style={{ fontSize: 10, fontWeight: 800, color: "#81D4FA", letterSpacing: 1.5, marginBottom: 8 }}>
+          KEY FACTS TO KNOW
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 10px" }}>
+          {QUICK.map((q, i) => (
+            <div key={i} style={{ display: "flex", gap: 5, alignItems: "flex-start" }}>
+              <span style={{ fontSize: 14, flexShrink: 0 }}>{q.i}</span>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "#B3E5FC" }}>{q.t}</div>
+                <div style={{ fontSize: 10, color: "#90CAF9", lineHeight: 1.4 }}>{q.b}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PHASE TABS ─────────────────────────────── */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 20,
+        background: T.sand, borderBottom: `2px solid ${T.sandDark}`,
+        display: "flex", overflowX: "auto", padding: "8px 8px 0", gap: 6
+      }}>
+        {PHASES.map(p => (
+          <button key={p.id} onClick={() => { setTab(p.id); setExpanded(null); }} style={{
+            flexShrink: 0, padding: "6px 12px 8px", borderRadius: "10px 10px 0 0",
+            border: "none", cursor: "pointer", fontSize: 11, fontWeight: 800,
+            letterSpacing: 0.3, transition: "all 0.15s",
+            background: tab === p.id ? p.accent : "transparent",
+            color: tab === p.id ? "#fff" : T.muted,
+            boxShadow: tab === p.id ? `0 -2px 8px ${p.accent}40` : "none"
+          }}>
+            {p.emoji} {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── PHASE HEADER ───────────────────────────── */}
+      <div style={{
+        background: phase.accent + "18", borderBottom: `1px solid ${phase.accent}30`,
+        padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: phase.accent }}>{phase.emoji} {phase.label}</div>
+          <div style={{ fontSize: 11, color: T.muted }}>{phase.eng}</div>
+        </div>
+        <div style={{
+          background: T.amber + "22", border: `1px solid ${T.amber}40`,
+          borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, color: T.amber
+        }}>
+          {phase.range}
+        </div>
+      </div>
+
+      {/* ── METHOD CARDS ───────────────────────────── */}
+      <div style={{ padding: "12px 12px 4px" }}>
+        {phase.methods.map((m, idx) => (
+          <MethodCard key={idx} m={m} idx={idx} expanded={expanded} onToggle={toggle} accent={phase.accent} />
+        ))}
+      </div>
+
+      {/* ── COOLING MATH ───────────────────────────── */}
+      <div style={{ padding: "4px 12px 12px" }}>
+        <button onClick={() => setShowMath(!showMath)} style={{
+          width: "100%", background: `linear-gradient(135deg, ${T.heat}22, ${T.cool}22)`,
+          border: `1.5px solid ${T.cool}50`, borderRadius: 14, padding: "12px 16px",
+          cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center"
+        }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 14, color: T.coolDark }}>🎯 Cooling Math: How It Adds Up</div>
+            <div style={{ fontSize: 11, color: T.muted }}>See how methods stack to reach 25°C</div>
+          </div>
+          <span style={{ color: T.muted }}>{showMath ? "▲" : "▼"}</span>
+        </button>
+
+        {showMath && (
+          <div style={{
+            background: T.card, border: `1px solid ${T.sandDark}`,
+            borderRadius: "0 0 14px 14px", borderTop: "none", padding: "4px 0"
+          }}>
+            {mathRows.map((r, i) => {
+              const isFirst = i === 0;
+              const isLast = i === mathRows.length - 1;
+              const pct = Math.max(5, Math.min(100, ((r.after - 20) / (50 - 20)) * 100));
+              return (
+                <div key={i} style={{
+                  padding: "8px 14px",
+                  borderBottom: isLast ? "none" : `1px solid ${T.sandDark}`,
+                  background: isLast ? r.col + "14" : "transparent"
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: isLast || isFirst ? 800 : 600, color: T.text }}>
+                        {isFirst ? "🌡️ " : isLast ? "❄️ " : "→ "}{r.step}
+                      </div>
+                      <div style={{ fontSize: 10, color: T.muted }}>{r.note}</div>
+                    </div>
+                    <div style={{ textAlign: "right", flexShrink: 0, paddingLeft: 8 }}>
+                      {r.delta !== undefined && (
+                        <div style={{ fontSize: 12, fontWeight: 700, color: T.green }}>−{Math.abs(r.delta)}°C</div>
+                      )}
+                      <div style={{
+                        fontSize: isLast ? 18 : 13, fontWeight: 900, color: r.col,
+                        fontFamily: "monospace"
+                      }}>{r.after}°C</div>
+                    </div>
+                  </div>
+                  <div style={{ height: 5, background: T.sandDark, borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%", width: `${pct}%`, borderRadius: 3,
+                      background: `linear-gradient(90deg, ${r.col}, ${r.col}88)`,
+                      transition: "width 0.5s"
+                    }} />
+                  </div>
+                </div>
+              );
+            })}
+            <div style={{ padding: "10px 14px", background: T.cool + "10" }}>
+              <p style={{ margin: 0, fontSize: 11.5, color: T.coolDark, lineHeight: 1.6 }}>
+                <strong>Note:</strong> Effects overlap partially — combined real-world result is <strong>24–30°C indoors</strong> during peak 47–50°C heat when all methods are applied together in a dry climate like Bundelkhand.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── PRIORITY ACTION LIST ────────────────────── */}
+      <div style={{ padding: "0 12px 12px" }}>
+        <div style={{ background: T.card, border: `1px solid ${T.sandDark}`, borderRadius: 14, padding: 14 }}>
+          <div style={{ fontWeight: 800, fontSize: 13, color: T.text, marginBottom: 10 }}>
+            🚀 Priority Action Order (Start Today)
+          </div>
+          {[
+            ["This week, ₹0–500", "Night purging + window direction strategy. Free cooling, start tonight."],
+            ["This week, ₹500–1500", "Khus tatty on all windows + wet gunny bags on roof. Biggest immediate effect."],
+            ["This week, ₹500–2000", "White chuna on roof. Single biggest passive cooling step."],
+            ["Month 1, ₹5,000–15,000", "Roof thermocol insulation. Game changer for indoor comfort."],
+            ["3 Months, ₹20,000+", "Earth air tunnel if you have land. Permanent 12–18°C cooling, zero running cost."],
+            ["Long term", "Plant bamboo on west side now — it gives shade in 1–2 years. Start today."],
+          ].map(([time, desc], i) => (
+            <div key={i} style={{
+              display: "flex", gap: 10, marginBottom: i < 5 ? 8 : 0,
+              paddingBottom: i < 5 ? 8 : 0, borderBottom: i < 5 ? `1px solid ${T.sandDark}` : "none"
+            }}>
+              <div style={{
+                background: T.heat, color: "#fff", borderRadius: "50%",
+                width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                fontWeight: 900, fontSize: 11, flexShrink: 0, marginTop: 1
+              }}>{i + 1}</div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.heat }}>{time}</div>
+                <div style={{ fontSize: 12, color: T.text, lineHeight: 1.5 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FOOTER NOTE ────────────────────────────── */}
+      <div style={{ padding: "0 12px 24px" }}>
+        <div style={{
+          background: T.green + "15", border: `1px solid ${T.green}30`,
+          borderRadius: 12, padding: 12
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: T.green, marginBottom: 4 }}>
+            📍 Your Bundelkhand Advantage
+          </div>
+          <p style={{ margin: 0, fontSize: 11.5, color: "#1A3A1A", lineHeight: 1.6 }}>
+            Bundelkhand's <strong>hot dry climate</strong> is actually ideal for natural cooling — evaporative methods work 2× better than in humid cities.
+            You have <strong>land for earth air tunnels</strong>,
+            <strong> local Vindhyan sandstone</strong> for thick walls,
+            <strong> bamboo</strong> for shading, and
+            <strong> clay soil</strong> for mud plaster — all for free or near zero cost.
+            Traditional Bundela architecture already solved this problem centuries ago.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
